@@ -10,9 +10,10 @@ class homebrew::config {
   $cachedir   = "${boxen::config::cachedir}/homebrew"
   $installdir = $::homebrew_root
   $libdir     = "${installdir}/lib"
+  $repodir    = "${installdir}/Homebrew"
 
-  $cmddir     = "${installdir}/Library/Homebrew/cmd"
-  $tapsdir    = "${installdir}/Library/Taps"
+  $cmddir     = "${repodir}/Library/Homebrew/cmd"
+  $tapsdir    = "${repodir}/Library/Taps"
 
   $brewsdir   = "${tapsdir}/boxen/homebrew-brews"
 

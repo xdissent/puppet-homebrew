@@ -10,7 +10,8 @@ Puppet::Type.type(:homebrew_tap).provide :default do
   end
 
   def self.taps_dir
-    @taps_dir ||= "#{home}/Library/Taps"
+    # TODO: get repodir from facts
+    @taps_dir ||= "#{home}/Homebrew/Library/Taps"
   end
 
   def self.instances

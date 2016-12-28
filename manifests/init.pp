@@ -8,6 +8,7 @@ class homebrew(
   $cachedir     = $homebrew::config::cachedir,
   $installdir   = $homebrew::config::installdir,
   $libdir       = $homebrew::config::libdir,
+  $repodir      = $homebrew::config::repodir,
   $cmddir       = $homebrew::config::cmddir,
   $tapsdir      = $homebrew::config::tapsdir,
   $brewsdir     = $homebrew::config::brewsdir,
@@ -20,12 +21,15 @@ class homebrew(
   include homebrew::repo
 
   file { [$installdir,
+          $repodir,
           "${installdir}/bin",
           "${installdir}/etc",
+          "${installdir}/etc/bash_completion.d",
           "${installdir}/include",
           "${installdir}/lib",
           "${installdir}/lib/pkgconfig",
-          "${installdir}/Library",
+          "${installdir}/Cellar",
+          "${installdir}/Frameworks",
           "${installdir}/sbin",
           "${installdir}/share",
           "${installdir}/share/locale",
@@ -41,8 +45,11 @@ class homebrew(
           "${installdir}/share/info",
           "${installdir}/share/doc",
           "${installdir}/share/aclocal",
+          "${installdir}/share/zsh",
+          "${installdir}/share/zsh/site-functions",
           "${installdir}/var",
           "${installdir}/var/log",
+          "${installdir}/opt",
           ]:
     ensure  => 'directory',
     owner   => $::boxen_user,
@@ -58,14 +65,37 @@ class homebrew(
                 git config remote.origin.fetch master:refs/remotes/origin/master &&
                 git fetch origin master:refs/remotes/origin/master -n &&
                 git reset --hard origin/master",
-    cwd     => $installdir,
+    cwd     => $repodir,
     user    => $::boxen_user,
-    creates => "${installdir}/.git",
-    require => File[$installdir],
+    creates => "${repodir}/.git",
+    require => File[$repodir],
+  } ~>
+  exec { 'post-install force brew update':
+    command => 'brew update --force',
+    cwd => $repodir,
+    user => $::boxen_user,
+    environment => [
+      "USER=$::boxen_user",
+      "HOME=/Users/${::boxen_user}",
+    ],
+    path => [
+      "${repodir}/bin",
+      '/usr/bin',
+      '/usr/sbin',
+      '/bin',
+      '/sbin',
+    ],
   }
 
   File {
     require => Exec["install homebrew to ${installdir}"],
+  }
+
+  file { "${installdir}/bin/brew":
+    ensure => link,
+    target => "${repodir}/bin/brew",
+    owner   => $::boxen_user,
+    group   => 'staff',
   }
 
   # Remove the old monkey patches, from pre #39
