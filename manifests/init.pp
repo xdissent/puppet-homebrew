@@ -14,11 +14,38 @@ class homebrew(
   $brewsdir     = $homebrew::config::brewsdir,
   $min_revision = $homebrew::config::min_revision,
   $repo         = 'Homebrew/brew',
-  $set_cflags   = true,
-  $set_ldflags  = true,
+  $set_cflags   = undef,
+  $set_ldflags  = undef,
+  $add_man_path = undef,
+  $add_bin_path = undef,
 ) inherits homebrew::config {
   include boxen::config
   include homebrew::repo
+
+  $non_default = $installdir ? {
+    /^\/usr\/local\/?$/ => false,
+    default => true
+  }
+
+  $set_cflags_ = $set_cflags ? {
+    undef => $non_default,
+    default => true
+  }
+
+  $set_ldflags_ = $set_ldflags ? {
+    undef => $non_default,
+    default => true
+  }
+
+  $add_man_path_ = $add_man_path ? {
+    undef => $non_default,
+    default => true
+  }
+
+  $add_bin_path_ = $add_bin_path ? {
+    undef => $non_default,
+    default => true
+  }
 
   file { [$installdir,
           $repodir,
@@ -71,6 +98,7 @@ class homebrew(
     require => File[$repodir],
   } ~>
   exec { 'post-install force brew update':
+    refreshonly => true,
     command => 'brew update --force',
     cwd => $repodir,
     user => $::boxen_user,
