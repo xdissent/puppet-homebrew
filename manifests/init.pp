@@ -47,8 +47,18 @@ class homebrew(
     default => true
   }
 
-  file { [$installdir,
-          $repodir,
+  if $non_default {
+    file { $installdir:
+      ensure  => 'directory',
+      owner   => $::boxen_user,
+      group   => 'staff',
+      mode    => '0755',
+      require => undef,
+      before  => Exec["install homebrew to ${installdir}"],
+    }
+  }
+
+  file { [$repodir,
           "${installdir}/bin",
           "${installdir}/etc",
           "${installdir}/etc/bash_completion.d",
