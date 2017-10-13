@@ -65,6 +65,7 @@ class homebrew(
           "${installdir}/include",
           "${installdir}/lib",
           "${installdir}/lib/pkgconfig",
+          "${installdir}/Caskroom",
           "${installdir}/Cellar",
           "${installdir}/Frameworks",
           "${installdir}/sbin",
